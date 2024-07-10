@@ -2,6 +2,7 @@ package com.example.taskapp.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -70,7 +72,11 @@ fun TaskList(taskViewModel: TaskViewModel) {
 @Composable
 fun ItemTask(task: TaskModel, taskViewModel: TaskViewModel) {
     Card(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).pointerInput(Unit) {
+            detectTapGestures(onLongPress = {
+                taskViewModel.onItemRemove(task)
+            })
+        },
         border = BorderStroke(2.dp, Color.Blue)
     ) {
         Row(
