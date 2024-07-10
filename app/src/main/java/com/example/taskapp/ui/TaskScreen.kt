@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -31,21 +32,22 @@ import androidx.compose.ui.window.Dialog
 @Composable
 fun TaskScreen(taskViewModel: TaskViewModel) {
 
+    val showDialog: Boolean by taskViewModel.showDialog.observeAsState(initial = false)
     Box(modifier = Modifier.fillMaxSize()) {
-        AddTaskDialog(show = true, onDismiss = {}, onTaskAdded = {})
+        AddTaskDialog(showDialog = showDialog, onDismiss = { taskViewModel.onDialogClose() }, onTaskAdded = {taskViewModel.onTaskCreated(it)})
         FloatButton(
             Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
-        )
+        ,taskViewModel)
     }
 
 }
 
 @Composable
-fun FloatButton(padding: Modifier) {
+fun FloatButton(padding: Modifier, taskViewModel: TaskViewModel) {
     FloatingActionButton(
-        onClick = {},
+        onClick = {taskViewModel.onDialogOpen()},
         modifier = padding
     ) {
         Icon(Icons.Filled.Add, contentDescription = "")
@@ -54,9 +56,9 @@ fun FloatButton(padding: Modifier) {
 
 
 @Composable
-fun AddTaskDialog(show: Boolean, onDismiss: () -> Unit, onTaskAdded: (String) -> Unit) {
+fun AddTaskDialog(showDialog: Boolean, onDismiss: () -> Unit, onTaskAdded: (String) -> Unit) {
     var task by remember { mutableStateOf("") }
-    if (show) {
+    if (showDialog) {
         Dialog(onDismissRequest = { onDismiss() }) {
             Column(
                 Modifier
