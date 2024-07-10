@@ -72,11 +72,13 @@ fun TaskList(taskViewModel: TaskViewModel) {
 @Composable
 fun ItemTask(task: TaskModel, taskViewModel: TaskViewModel) {
     Card(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).pointerInput(Unit) {
-            detectTapGestures(onLongPress = {
-                taskViewModel.onItemRemove(task)
-            })
-        },
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .pointerInput(Unit) {
+                detectTapGestures(onLongPress = {
+                    taskViewModel.onItemRemove(task)
+                })
+            },
         border = BorderStroke(2.dp, Color.Blue)
     ) {
         Row(

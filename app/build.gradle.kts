@@ -52,6 +52,11 @@ android {
 }
 
 dependencies {
+    //Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler) //TODO revisar
+
     //LiveData
     implementation(libs.androidx.compose.runtime.livedata)
 
