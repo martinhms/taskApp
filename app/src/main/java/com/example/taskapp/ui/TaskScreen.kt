@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -31,39 +32,63 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.taskapp.ui.model.TaskModel
 
 @Composable
 fun TaskScreen(taskViewModel: TaskViewModel) {
-
     val showDialog: Boolean by taskViewModel.showDialog.observeAsState(initial = false)
-    Box(modifier = Modifier.fillMaxSize()) {
-        AddTaskDialog(
-            showDialog = showDialog,
-            onDismiss = { taskViewModel.onDialogClose() },
-            onTaskAdded = { taskViewModel.onTaskCreated(it) })
-        FloatButton(
-            Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp), taskViewModel
-        )
-        TaskList(taskViewModel)
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+    val uiState by produceState<TaskUiState>(
+        initialValue = TaskUiState.Loading,
+        key1 = lifecycle,
+        key2 = taskViewModel
+    ) {
+        lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
+            taskViewModel.uiState.collect { value = it }
+        }
     }
+
+    when (uiState) {
+        is TaskUiState.Error -> {}
+        TaskUiState.Loading -> {
+            CircularProgressIndicator()
+        }
+
+        is TaskUiState.Success -> {
+            Box(modifier = Modifier.fillMaxSize()) {
+                AddTaskDialog(
+                    showDialog = showDialog,
+                    onDismiss = { taskViewModel.onDialogClose() },
+                    onTaskAdded = { taskViewModel.onTaskCreated(it) })
+                FloatButton(
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp), taskViewModel
+                )
+                TaskList((uiState as TaskUiState.Success).task, taskViewModel)
+            }
+        }
+    }
+
 
 }
 
 @Composable
-fun TaskList(taskViewModel: TaskViewModel) {
-    val taskList: List<TaskModel> = taskViewModel.tasks
+fun TaskList(task: List<TaskModel>, taskViewModel: TaskViewModel) {
 
     LazyColumn {
         //el parametro key sirve para optimizar el RV
-        items(taskList, key = { it.id }) { task ->
+        items(task, key = { it.id }) { task ->
             ItemTask(task = task, taskViewModel = taskViewModel)
         }
     }
