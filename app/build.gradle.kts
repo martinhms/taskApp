@@ -52,8 +52,18 @@ android {
 }
 
 dependencies {
+    //Room
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    kapt(libs.room.compiler) //TODO revisar
+
+    //LiveData
+    implementation(libs.androidx.compose.runtime.livedata)
+
+    //Dagger
     implementation(libs.hilt.android)
     kapt(libs.hilt.compiler)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
